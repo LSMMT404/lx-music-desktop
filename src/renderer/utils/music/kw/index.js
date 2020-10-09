@@ -5,8 +5,9 @@ import { formatSinger, getToken } from './util'
 import leaderboard from './leaderboard'
 import lyric from './lyric'
 import pic from './pic'
-import api_source from '../api-source'
+import { apis } from '../api-source'
 import songList from './songList'
+import hotSearch from './hotSearch'
 
 const kw = {
   _musicInfoRequestObj: null,
@@ -34,9 +35,10 @@ const kw = {
   musicSearch,
   leaderboard,
   songList,
-  getLyric(songInfo) {
+  hotSearch,
+  getLyric(songInfo, isGetLyricx) {
     // let singer = songInfo.singer.indexOf('、') > -1 ? songInfo.singer.split('、')[0] : songInfo.singer
-    return lyric.getLyric(songInfo.songmid)
+    return lyric.getLyric(songInfo.songmid, isGetLyricx)
   },
   handleMusicInfo(songInfo) {
     return this.getMusicInfo(songInfo).then(info => {
@@ -56,7 +58,7 @@ const kw = {
   },
 
   getMusicUrl(songInfo, type) {
-    return api_source('kw').getMusicUrl(songInfo, type)
+    return apis('kw').getMusicUrl(songInfo, type)
   },
 
   getMusicInfo(songInfo) {
@@ -95,6 +97,10 @@ const kw = {
 
   getPic(songInfo) {
     return pic.getPic(songInfo)
+  },
+
+  getMusicDetailPageUrl(songInfo) {
+    return `http://www.kuwo.cn/play_detail/${songInfo.songmid}`
   },
 
   init() {

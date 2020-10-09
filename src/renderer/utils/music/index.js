@@ -4,6 +4,10 @@ import tx from './tx'
 import wy from './wy'
 import mg from './mg'
 import bd from './bd'
+import xm from './xm'
+import { supportQuality } from './api-source'
+
+
 const sources = {
   sources: [
     {
@@ -27,9 +31,13 @@ const sources = {
       id: 'mg',
     },
     {
-      name: '百度音乐',
-      id: 'bd',
+      name: '虾米音乐',
+      id: 'xm',
     },
+    // {
+    //   name: '百度音乐',
+    //   id: 'bd',
+    // },
   ],
   kw,
   kg,
@@ -37,6 +45,7 @@ const sources = {
   wy,
   mg,
   bd,
+  xm,
 }
 export default {
   ...sources,
@@ -46,4 +55,5 @@ export default {
       sm && sm.init && sm.init()
     }
   },
+  supportQuality,
 }

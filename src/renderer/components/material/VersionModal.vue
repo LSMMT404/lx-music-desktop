@@ -44,27 +44,28 @@ material-modal(:show="version.showModal" @close="handleClose" v-if="version.newV
         p 发现有新版本啦，但是自动更新功能出问题了，
         p
           | 你可以去&nbsp;
-          strong.hover.underline(@click="handleOpenUrl('https://github.com/lyswhut/lx-music-desktop/releases')" title="点击打开") 软件发布页
+          strong.hover.underline(@click="handleOpenUrl('https://github.com/lyswhut/lx-music-desktop/releases')" tips="点击打开") 软件发布页
           | &nbsp;或&nbsp;
-          strong.hover.underline(@click="handleOpenUrl('https://www.lanzous.com/b906260/')" title="点击打开") 网盘
+          strong.hover.underline(@click="handleOpenUrl('https://www.lanzoux.com/b0bf2cfa/')" tips="点击打开") 网盘
           | (密码：
-          strong.hover(@click="handleCopy('glqw')" title="点击复制") glqw
+          strong.hover(@click="handleCopy('glqw')" tips="点击复制") glqw
           | )&nbsp;下载新版本，
         p
           | 国内Windows/MAC用户推荐到
           strong 网盘
           | 下载。
+      material-btn(:class="$style.btn" @click.onec="handleIgnoreClick") {{ isIgnored ? '恢复当前版本的更新失败提醒' : '忽略当前版本的更新失败提醒'}}
   main(:class="$style.main" v-else-if="version.isDownloading && version.isTimeOut && !version.isUnknow")
     h2 ❗️ 新版本下载超时 ❗️
     div(:class="$style.desc")
       p 你当前所在网络访问GitHub较慢，导致新版本下载超时（已经下了半个钟了😳），建议手动更新版本！
       p
         | 你可以去
-        material-btn(min @click="handleOpenUrl('https://github.com/lyswhut/lx-music-desktop/releases')" title="点击打开") 软件发布页
+        material-btn(min @click="handleOpenUrl('https://github.com/lyswhut/lx-music-desktop/releases')" tips="点击打开") 软件发布页
         | 或
-        material-btn(min @click="handleOpenUrl('https://www.lanzous.com/b906260/')" title="点击打开") 网盘
+        material-btn(min @click="handleOpenUrl('https://www.lanzoux.com/b0bf2cfa/')" tips="点击打开") 网盘
         | (密码：
-        strong.hover(@click="handleCopy('glqw')" title="点击复制") glqw
+        strong.hover(@click="handleCopy('glqw')" tips="点击复制") glqw
         | )下载新版本，
       p
         | 国内Windows/MAC用户推荐到
@@ -81,11 +82,11 @@ material-modal(:show="version.showModal" @close="handleClose" v-if="version.newV
           p 更新信息获取失败，可能是无法访问Github导致的，请手动检查更新！
           p
             | 检查方法：打开
-            material-btn(min @click="handleOpenUrl('https://github.com/lyswhut/lx-music-desktop/releases')" title="点击打开") 软件发布页
+            material-btn(min @click="handleOpenUrl('https://github.com/lyswhut/lx-music-desktop/releases')" tips="点击打开") 软件发布页
             | 或
-            material-btn(min @click="handleOpenUrl('https://www.lanzous.com/b906260/')" title="点击打开") 网盘
+            material-btn(min @click="handleOpenUrl('https://www.lanzoux.com/b0bf2cfa/')" tips="点击打开") 网盘
             | (密码：
-            strong.hover(@click="handleCopy('glqw')" title="点击复制") glqw
+            strong.hover(@click="handleCopy('glqw')" tips="点击复制") glqw
             | )查看它们的
             strong 版本号
             | 与当前版本({{version.version}})对比是否一样，
@@ -109,12 +110,16 @@ material-modal(:show="version.showModal" @close="handleClose" v-if="version.newV
       div(:class="$style.desc")
         p 发现有新版本啦，正在努力更新中，若下载太慢可以手动更新哦~
         p
+          | 你也可以关闭本弹窗继续使用软件，还可在
+          strong 设置-软件更新
+          | 重新打开本弹窗。
+        p
           | 手动更新可以去&nbsp;
-          strong.hover.underline(@click="handleOpenUrl('https://github.com/lyswhut/lx-music-desktop/releases')" title="点击打开") 软件发布页
+          strong.hover.underline(@click="handleOpenUrl('https://github.com/lyswhut/lx-music-desktop/releases')" tips="点击打开") 软件发布页
           | &nbsp;或&nbsp;
-          strong.hover.underline(@click="handleOpenUrl('https://www.lanzous.com/b906260/')" title="点击打开") 网盘
+          strong.hover.underline(@click="handleOpenUrl('https://www.lanzoux.com/b0bf2cfa/')" tips="点击打开") 网盘
           | (密码：
-          strong.hover(@click="handleCopy('glqw')" title="点击复制") glqw
+          strong.hover(@click="handleCopy('glqw')" tips="点击复制") glqw
           | )&nbsp;下载，
         p 国内Windows/MAC用户推荐到网盘下载。
         p 当前下载进度：{{progress}}
@@ -122,8 +127,8 @@ material-modal(:show="version.showModal" @close="handleClose" v-if="version.newV
 
 <script>
 import { mapGetters, mapMutations } from 'vuex'
-import { rendererSend } from '../../../common/ipc'
-import { checkVersion, openUrl, clipboardWriteText, sizeFormate } from '../../utils'
+import { rendererSend, NAMES } from '../../../common/ipc'
+import { compareVer, openUrl, clipboardWriteText, sizeFormate } from '../../utils'
 
 export default {
   computed: {
@@ -133,7 +138,7 @@ export default {
       let arr = []
       let currentVer = this.version.version
       this.version.newVersion.history.forEach(ver => {
-        if (checkVersion(currentVer, ver.version)) arr.push(ver)
+        if (compareVer(currentVer, ver.version) < 0) arr.push(ver)
       })
 
       return arr
@@ -143,9 +148,12 @@ export default {
         ? `${this.version.downloadProgress.percent.toFixed(2)}% - ${sizeFormate(this.version.downloadProgress.transferred)}/${sizeFormate(this.version.downloadProgress.total)} - ${sizeFormate(this.version.downloadProgress.bytesPerSecond)}/s`
         : '初始化中...'
     },
+    isIgnored() {
+      return this.setting.ignoreVersion == this.version.newVersion.version
+    },
   },
   methods: {
-    ...mapMutations(['setVersionModalVisible', 'setSetting']),
+    ...mapMutations(['setVersionModalVisible', 'setIgnoreVersion']),
     handleClose() {
       this.setVersionModalVisible({
         isShow: false,
@@ -157,10 +165,14 @@ export default {
     handleRestartClick(event) {
       this.handleClose()
       event.target.disabled = true
-      rendererSend('quit-update')
+      rendererSend(NAMES.mainWindow.quit_update)
     },
     handleCopy(text) {
       clipboardWriteText(text)
+    },
+    handleIgnoreClick() {
+      this.setIgnoreVersion(this.isIgnored ? null : this.version.newVersion.version)
+      this.handleClose()
     },
   },
 }

@@ -59,6 +59,7 @@ class Task extends EventEmitter {
   __init() {
     this.status = STATUS.init
     const { path, startByte, endByte } = this.chunkInfo
+    this.progress.downloaded = 0
     if (startByte != null) this.requestOptions.headers.range = `bytes=${startByte}-${endByte}`
     return new Promise((resolve, reject) => {
       if (!path) return resolve()
@@ -140,7 +141,8 @@ class Task extends EventEmitter {
             if (response.complete) {
               this.__handleComplete()
             } else {
-              this.__handleError(new Error('The connection was terminated while the message was still being sent'))
+              // this.__handleError(new Error('The connection was terminated while the message was still being sent'))
+              this.stop()
             }
           })
       })
@@ -170,7 +172,7 @@ class Task extends EventEmitter {
         this.chunkInfo.startByte = 0
         this.resumeLastChunk = null
         this.progress.downloaded = 0
-        if (unlinkErr) this.__handleError(unlinkErr)
+        if (unlinkErr && unlinkErr.code !== 'ENOENT') this.__handleError(unlinkErr)
       })
     })
   }
@@ -321,6 +323,10 @@ class Task extends EventEmitter {
 
   refreshUrl(url) {
     this.downloadUrl = url
+  }
+
+  updateSaveInfo(filePath, fileName) {
+    this.chunkInfo.path = path.join(filePath, fileName)
   }
 }
 

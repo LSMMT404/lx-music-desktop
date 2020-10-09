@@ -1,4 +1,5 @@
 import { httpGet } from '../../request'
+import { rendererInvoke, NAMES } from '../../../../common/ipc'
 
 if (!window.kw_token) {
   window.kw_token = {
@@ -24,7 +25,7 @@ export const getToken = () => new Promise((resolve, reject) => {
   if (window.kw_token.isGetingToken) return wait(1000).then(() => getToken().then(token => resolve(token)))
   if (window.kw_token.token) return resolve(window.kw_token.token)
   window.kw_token.isGetingToken = true
-  httpGet('http://www.kuwo.cn', (err, resp) => {
+  httpGet('http://www.kuwo.cn/', (err, resp) => {
     window.kw_token.isGetingToken = false
     if (err) return reject(err)
     if (resp.statusCode != 200) return reject(new Error('获取失败'))
@@ -32,3 +33,5 @@ export const getToken = () => new Promise((resolve, reject) => {
     resolve(token)
   })
 })
+
+export const decodeLyric = base64Data => rendererInvoke(NAMES.mainWindow.handle_kw_decode_lyric, base64Data)

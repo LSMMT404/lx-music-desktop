@@ -1,7 +1,7 @@
 <template lang="pug">
-  input(:class="$style.input" :type="type" :placeholder="placeholder" v-model.trim="text" :disabled="disabled"
-    @focus="$emit('focus', $event)" @blur="$emit('blur', $event)" @input="$emit('input', text)" @change="$emit('change', text)"
-    @keyup.enter="submit")
+  input(:class="$style.input" :type="type" :placeholder="placeholder" :value="value" :disabled="disabled"
+    @focus="$emit('focus', $event)" @blur="$emit('blur', $event)" @input="$emit('input', $event.trim())" @change="$emit('change', text)"
+    @keyup.enter="$emit('submit', text)")
 </template>
 
 <script>
@@ -24,21 +24,6 @@ export default {
       default: 'text',
     },
   },
-  data() {
-    return {
-      text: '',
-    }
-  },
-  watch: {
-    value(n) {
-      this.text = n
-    },
-  },
-  methods: {
-    handleInput() {
-
-    },
-  },
 }
 </script>
 
@@ -49,12 +34,13 @@ export default {
 .input {
   display: inline-block;
   border: none;
-  border-radius: 3px;
+  border-radius: @form-radius;
   padding: 7px 8px;
   color: @color-btn;
   outline: none;
   transition: background-color 0.2s ease;
   background-color: @color-btn-background;
+  font-size: 13.3px;
   &[disabled] {
     opacity: .4;
   }
